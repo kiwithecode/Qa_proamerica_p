@@ -12,6 +12,9 @@ service = Service(executable_path=driver_path)
 # Configura el WebDriver para Edge
 driver = webdriver.Edge(service=service)
 
+# Inicializa la variable para rastrear el éxito de la prueba
+prueba_exitosa = False
+
 try:
     # Abre el sitio web
     driver.get('https://www.clubpromerica.com/costarica/')
@@ -26,13 +29,19 @@ try:
             EC.element_to_be_clickable((By.XPATH, contact_link_xpath))
         )
         contact_link.click()
+        
+        # Si llegamos aquí, la prueba se considera exitosa
+        prueba_exitosa = True
+        
     except TimeoutException:
         print("El enlace 'Contáctenos' no se cargó en el tiempo esperado.")
     except ElementNotInteractableException:
-        # Si el enlace no es interactuable, intenta hacer clic usando JavaScript
+        
         contact_link = driver.find_element(By.XPATH, contact_link_xpath)
         driver.execute_script("arguments[0].click();", contact_link)
     
+        # Consideramos exitosa la prueba si logramos hacer clic mediante JavaScript
+        prueba_exitosa = True
    
 except NoSuchElementException:
     print("Elemento no encontrado.")
@@ -43,3 +52,9 @@ finally:
     import time
     time.sleep(5)  # Espera 5 segundos
     driver.quit()
+    
+    # Imprime el mensaje final basado en el éxito de la prueba
+    if prueba_exitosa:
+        print("Prueba finalizada exitosamente.")
+    else:
+        print("Prueba no exitosa.")
